@@ -39,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./dist/public # 👈 শুধু এই লাইনটি পরিবর্তন করা হয়েছে
 
   deploy:
     environment:
