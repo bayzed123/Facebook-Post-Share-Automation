@@ -2,9 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ] # Change this to 'master' if your default repository branch is master
+    branches: [ main ]
 
-# Set permissions granted to the GITHUB_TOKEN for deployment
 permissions:
   contents: read
   pages: write
@@ -17,21 +16,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      # 1. Install pnpm first
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10 # Matches the version in your package.json
+
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm' # Caches pnpm dependencies to speed up future builds
           
+      # 2. Use pnpm instead of npm
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         
+      # 3. Use pnpm to build
       - name: Build project
-        run: npm run build
+        run: pnpm run build
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist # Vite compiles the production build into the 'dist' folder
+          path: ./dist
 
   deploy:
     environment:
