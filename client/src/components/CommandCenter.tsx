@@ -5,6 +5,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { Play, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+import { dispatchAutomationEvent } from '@/lib/events';
+import { getWorkspaceName } from '@/lib/workspace';
 
 interface CommandCenterProps {
   workspaceId: number;
@@ -17,7 +20,6 @@ export default function CommandCenter({ workspaceId }: CommandCenterProps) {
     setContentInput,
     setTaskConfig,
     resetCommandCenter,
-    setIframeUrl,
     addLog,
   } = useWorkspaceStore();
 
@@ -39,21 +41,39 @@ export default function CommandCenter({ workspaceId }: CommandCenterProps) {
   const handleExecute = () => {
     if (!workspace.targetUrl) {
       addLog(workspaceId, 'Error: Target URL is required', 'failed');
+      toast.error('Target URL is required');
       return;
     }
 
-    addLog(workspaceId, `Executing task with URL: ${workspace.targetUrl}`, 'running');
-    setIframeUrl(workspaceId, workspace.targetUrl);
+    const workspaceName = getWorkspaceName(workspaceId);
     
-    // Simulate task execution
+    // Dispatch custom event for the browser extension
+    dispatchAutomationEvent({
+      workspaceId,
+      workspaceName,
+      targetUrl: workspace.targetUrl,
+      contentInput: workspace.contentInput,
+      taskConfig: workspace.taskConfig,
+      timestamp: new Date().toISOString(),
+      type: 'manual'
+    });
+
+    addLog(workspaceId, `Command sent to browser extension: ${workspace.targetUrl}`, 'running');
+    toast.success('Command sent to browser extension', {
+      description: `Target: ${workspace.targetUrl}`,
+    });
+    
+    // We no longer set iframe URL as per requirements
+    // Instead, we simulate the extension starting the work
     setTimeout(() => {
-      addLog(workspaceId, 'Task execution completed', 'success');
-    }, 2000);
+      addLog(workspaceId, 'Automation signal received by extension bridge', 'success');
+    }, 1000);
   };
 
   const handleReset = () => {
     resetCommandCenter(workspaceId);
     addLog(workspaceId, 'Command center reset', 'pending');
+    toast.info('Command center reset');
   };
 
   const handleRemoveConfig = (key: string) => {

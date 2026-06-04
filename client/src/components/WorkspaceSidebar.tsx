@@ -1,18 +1,11 @@
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
+import { WORKSPACE_NAMES } from '@/lib/workspace';
 
 interface WorkspaceSidebarProps {
   onWorkspaceChange?: (id: number) => void;
 }
-
-const workspaceNames = [
-  'Alpha',
-  'Beta',
-  'Gamma',
-  'Delta',
-  'Epsilon',
-];
 
 export default function WorkspaceSidebar({ onWorkspaceChange }: WorkspaceSidebarProps) {
   const { activeWorkspace, setActiveWorkspace, workspaces } = useWorkspaceStore();
@@ -52,7 +45,7 @@ export default function WorkspaceSidebar({ onWorkspaceChange }: WorkspaceSidebar
           Workspaces
         </p>
 
-        {workspaceNames.map((name, id) => {
+        {WORKSPACE_NAMES.map((name, id) => {
           const workspace = workspaces[id];
           const hasLogs = workspace.logs.length > 0;
           const hasTasks = workspace.socialTasks.length > 0;
@@ -98,7 +91,7 @@ export default function WorkspaceSidebar({ onWorkspaceChange }: WorkspaceSidebar
       <div className="pt-4 border-t border-cyan/20 space-y-2">
         <div className="bg-navy-light/50 rounded p-2 text-xs">
           <p className="text-foreground/60">
-            <span className="text-cyan font-semibold">Active:</span> {workspaceNames[activeWorkspace]}
+            <span className="text-cyan font-semibold">Active:</span> {WORKSPACE_NAMES[activeWorkspace]}
           </p>
         </div>
         <p className="text-xs text-foreground/50 text-center">

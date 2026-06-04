@@ -5,7 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Play, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Play, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { dispatchAutomationEvent } from '@/lib/events';
+import { getWorkspaceName } from '@/lib/workspace';
 
 interface SocialSharingManagerProps {
   workspaceId: number;
@@ -22,6 +25,7 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
   const handleAddTask = () => {
     if (!contentUrl || !targetUrls || !distributionCount) {
       addLog(workspaceId, 'Error: All fields are required', 'failed');
+      toast.error('All fields are required');
       return;
     }
 
@@ -32,12 +36,14 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
 
     if (urls.length === 0) {
       addLog(workspaceId, 'Error: At least one target URL is required', 'failed');
+      toast.error('At least one target URL is required');
       return;
     }
 
     const count = parseInt(distributionCount, 10);
     if (isNaN(count) || count <= 0) {
       addLog(workspaceId, 'Error: Distribution count must be a positive number', 'failed');
+      toast.error('Distribution count must be a positive number');
       return;
     }
 
@@ -52,6 +58,7 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
     });
 
     addLog(workspaceId, `Social task created: ${urls.length} targets, ${count} distributions`, 'success');
+    toast.success('Social task created');
 
     // Reset form
     setContentUrl('');
@@ -62,17 +69,38 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
   const handleExecuteTask = (taskId: string) => {
     const task = workspace.socialTasks.find((t) => t.id === taskId);
     if (task) {
+      const workspaceName = getWorkspaceName(workspaceId);
+      
       updateSocialTask(workspaceId, taskId, { status: 'running' });
       addLog(workspaceId, `Executing social task: ${task.contentUrl}`, 'running');
+      
+      // Dispatch custom event for the browser extension
+      dispatchAutomationEvent({
+        workspaceId,
+        workspaceName,
+        targetUrl: task.contentUrl,
+        contentInput: `Workflow Task: ${taskId}\nTargets: ${task.targetUrls.join(', ')}`,
+        taskConfig: {
+          distributionCount: task.distributionCount.toString(),
+          targetUrls: JSON.stringify(task.targetUrls),
+        },
+        timestamp: new Date().toISOString(),
+        type: 'social-workflow',
+        taskId: taskId
+      });
 
-      // Simulate execution
+      toast.success('Task command sent to extension', {
+        description: `URL: ${task.contentUrl}`,
+      });
+
+      // Simulate execution bridge
       setTimeout(() => {
         updateSocialTask(workspaceId, taskId, {
           status: 'action-required',
           pending: Math.max(0, task.pending - 1),
           remaining: Math.max(0, task.remaining - 1),
         });
-        addLog(workspaceId, `Manual approval required for task ${taskId.slice(0, 8)}`, 'action-required');
+        addLog(workspaceId, `Extension processed task ${taskId.slice(0, 8)}. Waiting for bridge approval.`, 'action-required');
       }, 1500);
     }
   };
@@ -97,6 +125,7 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
           : `Approval granted. Continuing distribution...`,
         'success'
       );
+      toast.success('Task approved');
     }
   };
 

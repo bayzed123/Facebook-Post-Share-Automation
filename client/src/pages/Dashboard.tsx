@@ -5,6 +5,7 @@ import BrowserView from '@/components/BrowserView';
 import TaskLogger from '@/components/TaskLogger';
 import SocialSharingManager from '@/components/SocialSharingManager';
 import { motion } from 'framer-motion';
+import { getWorkspaceName } from '@/lib/workspace';
 
 export default function Dashboard() {
   const activeWorkspace = useWorkspaceStore((state) => state.activeWorkspace);
@@ -28,7 +29,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-cyan uppercase tracking-wider">
-                Workspace {activeWorkspace + 1}
+                {getWorkspaceName(activeWorkspace)}
               </h1>
               <p className="text-sm text-foreground/60 mt-1">
                 Multi-Session Task Management & Workflow Dashboard
