@@ -171,13 +171,15 @@ export default function SocialSharingManager({ workspaceId }: SocialSharingManag
             <label className="block text-xs font-medium text-foreground/70 uppercase">
               Target URLs (one per line)
             </label>
-            <Textarea
-              placeholder="https://group1.com&#10;https://group2.com&#10;https://group3.com"
-              value={targetUrls}
-              onChange={(e) => setTargetUrls(e.target.value)}
-              rows={3}
-              className="bg-input border-cyan/30 text-foreground placeholder:text-foreground/40 text-sm resize-none"
-            />
+            <div className="relative">
+              <Textarea
+                placeholder="https://group1.com&#10;https://group2.com&#10;https://group3.com"
+                value={targetUrls}
+                onChange={(e) => setTargetUrls(e.target.value)}
+                rows={3}
+                className="bg-input border-cyan/30 text-foreground placeholder:text-foreground/40 text-sm resize-none max-h-[120px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyan/30 scrollbar-track-transparent"
+              />
+            </div>
           </div>
 
           <div className="space-y-1">

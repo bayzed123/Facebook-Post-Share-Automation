@@ -270,6 +270,28 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     }),
     {
       name: 'workflow-dashboard-store',
+      // Sanitize data on hydration to fix timestamp issues from old storage
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        
+        Object.values(state.workspaces).forEach(workspace => {
+          // Sanitize logs
+          if (Array.isArray(workspace.logs)) {
+            workspace.logs = workspace.logs.map(log => ({
+              ...log,
+              timestamp: typeof log.timestamp === 'string' ? new Date(log.timestamp) : log.timestamp
+            }));
+          }
+          
+          // Sanitize social tasks
+          if (Array.isArray(workspace.socialTasks)) {
+            workspace.socialTasks = workspace.socialTasks.map(task => ({
+              ...task,
+              createdAt: typeof task.createdAt === 'string' ? new Date(task.createdAt) : task.createdAt
+            }));
+          }
+        });
+      }
     }
   )
 );

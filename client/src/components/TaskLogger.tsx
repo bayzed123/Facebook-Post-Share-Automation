@@ -122,7 +122,16 @@ export default function TaskLogger({ workspaceId }: TaskLoggerProps) {
                   <Circle className={`w-2 h-2 mt-1 flex-shrink-0 ${statusColors[log.status]}`} fill="currentColor" />
                   <div className="flex-1 min-w-0">
                     <div className="text-foreground/60">
-                      {log.timestamp.toLocaleTimeString()}
+                      {(() => {
+                        try {
+                          const date = typeof log.timestamp === 'string' ? new Date(log.timestamp) : log.timestamp;
+                          return date instanceof Date && !isNaN(date.getTime()) 
+                            ? date.toLocaleTimeString() 
+                            : 'Invalid Date';
+                        } catch (e) {
+                          return 'Error';
+                        }
+                      })()}
                     </div>
                     <div className={`${statusColors[log.status]} break-words`}>
                       {log.message}
