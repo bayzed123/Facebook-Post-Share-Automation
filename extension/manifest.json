@@ -3,7 +3,7 @@
   "name": "FB Auto-Share Automation",
   "version": "1.0",
   "description": "Bridge for Facebook auto-share automation via dashboard events.",
-  "permissions": ["tabs", "activeTab", "scripting"],
+  "permissions": ["tabs", "activeTab", "scripting", "storage"],
   "host_permissions": ["https://www.facebook.com/*"],
   "background": {
     "service_worker": "background.js"
@@ -13,6 +13,11 @@
       "matches": ["*://*/*"],
       "js": ["dashboard.js"],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["*://www.facebook.com/*"],
+      "js": ["fb-automation.js"],
+      "run_at": "document_idle"
     }
   ]
 }
