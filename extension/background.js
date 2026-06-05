@@ -11,7 +11,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Create a new tab for Facebook automation
     chrome.tabs.create({ url: targetUrl }, (tab) => {
       console.log(`[FB Automation] Opened automation tab: ${tab.id}`);
-      // Here you would typically inject further automation scripts or monitor the tab
+      
+      // Wait for tab to load and send command to content script
+      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+        if (tabId === tab.id && info.status === 'complete') {
+          chrome.tabs.onUpdated.removeListener(listener);
+          
+          // Small delay to ensure FB's dynamic UI is ready
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tabId, { 
+              type: 'EXECUTE_SHARE',
+              groupUrl: targetUrl 
+            });
+          }, 3000);
+        }
+      });
     });
 
     sendResponse({ status: 'task_initiated', tabCreated: true });
